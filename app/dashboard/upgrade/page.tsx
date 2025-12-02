@@ -1,338 +1,292 @@
-"use client";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+"use client"
 
-import {   Check,
-  Badge,
-  CreditCard,
-  Shield,
-  Zap,
-  Building2,
-  Users,
-  ChevronRight,
-  Lock,} from "lucide-react";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Check, Sparkles, Zap, Crown, ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 
+const plans = [
+  {
+    name: 'Starter',
+    price: '$0',
+    period: 'Free forever',
+    description: 'Perfect for individuals getting started',
+    icon: Sparkles,
+    color: 'from-gray-600 to-gray-800',
+    features: [
+      { text: 'Up to 10 meetings/month', included: true },
+      { text: 'Basic AI summaries', included: true },
+      { text: 'Email notifications', included: true },
+      { text: '1 GB storage', included: true },
+      { text: 'Advanced analytics', included: false },
+      { text: 'Custom integrations', included: false },
+      { text: 'Priority support', included: false },
+      { text: 'Team collaboration', included: false },
+    ],
+    cta: 'Current Plan',
+    popular: false,
+  },
+  {
+    name: 'Professional',
+    price: '$29',
+    period: 'per user/month',
+    description: 'For professionals who need more power',
+    icon: Zap,
+    color: 'from-blue-600 to-purple-600',
+    features: [
+      { text: 'Unlimited meetings', included: true },
+      { text: 'Advanced AI summaries', included: true },
+      { text: 'Email & Slack notifications', included: true },
+      { text: '50 GB storage', included: true },
+      { text: 'Advanced analytics', included: true },
+      { text: 'Standard integrations', included: true },
+      { text: 'Priority support', included: false },
+      { text: 'Team collaboration', included: false },
+    ],
+    cta: 'Upgrade Now',
+    popular: true,
+  },
+  {
+    name: 'Enterprise',
+    price: '$99',
+    period: 'per user/month',
+    description: 'For teams that need enterprise features',
+    icon: Crown,
+    color: 'from-purple-600 to-pink-600',
+    features: [
+      { text: 'Unlimited everything', included: true },
+      { text: 'Custom AI models', included: true },
+      { text: 'All notification channels', included: true },
+      { text: 'Unlimited storage', included: true },
+      { text: 'Advanced analytics', included: true },
+      { text: 'Custom integrations', included: true },
+      { text: 'Priority support', included: true },
+      { text: 'Team collaboration', included: true },
+    ],
+    cta: 'Contact Sales',
+    popular: false,
+  },
+];
 
+const additionalFeatures = [
+  { category: 'AI Features', items: ['Smart summaries', 'Action item detection', 'Speaker identification', 'Sentiment analysis'] },
+  { category: 'Integrations', items: ['Slack', 'Teams', 'Zoom', 'Google Meet', 'Gmail', 'Calendar'] },
+  { category: 'Security', items: ['SOC 2 compliant', 'End-to-end encryption', 'SSO/SAML', 'Advanced permissions'] },
+  { category: 'Support', items: ['24/7 email support', 'Priority chat', 'Dedicated manager', 'Custom training'] },
+];
 
-export default function UpgradePage() {
-  const [billingCycle, setBillingCycle] = useState("monthly");
-
-  const pricingData = {
-    starter: {
-      name: "Starter",
-      tagline: "Perfect for individuals",
-       icon: Users,
-      monthlyPrice: 19, 
-      annualPrice: 15,
-      description: "Get started with AI meeting summaries",
-      features: [
-        "10 meetings per month",
-        "60-minute recordings",
-        "AI-powered summaries",
-        "Action items tracking",
-        "Email follow-ups",
-        "Basic integrations",
-        "Mobile app access",
-      ],
-      cta: "Start Free Trial",
-      popular: false,
-    },
-    pro: {
-      name: "Pro",
-      tagline: "Best for growing teams",
-      icon: Zap,
-      monthlyPrice: 49,
-      annualPrice: 39,
-      description: "Everything you need to scale",
-      features: [
-        "50 meetings per month",
-        "2-hour recordings",
-        "Advanced AI summaries",
-        "Team collaboration (10 users)",
-        "Priority support",
-        "Slack & Google integrations",
-        "Analytics dashboard",
-        "Custom templates",
-        "API access",
-      ],
-      cta: "Start Free Trial",
-      popular: true,
-    },
-    enterprise: {
-      name: "Enterprise",
-      tagline: "For large organizations",
-       icon: Building2,
-      monthlyPrice: null,
-      annualPrice: null,
-      description: "Unlimited power and flexibility",
-      features: [
-        "Unlimited meetings & users",
-        "Unlimited recording length",
-        "Custom AI training",
-        "Advanced API & webhooks",
-        "White-label options",
-        "SSO & SAML",
-        "Dedicated account manager",
-        "24/7 priority support",
-        "Custom integrations",
-      ],
-      cta: "Contact Sales",
-      popular: false,
-    },
-  };
-
-   const paymentMethods = [
-    "Visa",
-    "Mastercard",
-    "American Express",
-    "PayPal",
-    "Stripe",
-  ];
-  const comparisonFeatures = [
-    { name: "AI Meeting Summaries", starter: true, pro: true, enterprise: true },
-    { name: "Action Item Tracking", starter: true, pro: true, enterprise: true },
-    { name: "Email Generator", starter: true, pro: true, enterprise: true },
-    { name: "Team Collaboration", starter: false, pro: true, enterprise: true },
-    { name: "Analytics Dashboard", starter: false, pro: true, enterprise: true },
-    { name: "Advanced Integrations", starter: false, pro: true, enterprise: true },
-    { name: "API Access", starter: false, pro: true, enterprise: true },
-    { name: "Custom AI Training", starter: false, pro: false, enterprise: true },
-    { name: "White-label Options", starter: false, pro: false, enterprise: true },
-    { name: "SSO & SAML", starter: false, pro: false, enterprise: true },
-  ];
-
-
-  const getPrice = (plan) => {
-    const data = pricingData[plan];
-    if (data.monthlyPrice === null || data.monthlyPrice === undefined) return "Custom";
-    return billingCycle === "monthly" ? data.monthlyPrice : data.annualPrice;
-  };
-
-  const getSavingsPercent = () => {
-    const { monthlyPrice, annualPrice } = pricingData.pro;
-    return Math.round(((monthlyPrice - annualPrice) / monthlyPrice) * 100);
-  };
+export default function Upgrade() {
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   return (
-    <div>
-      
-    <div className="min-h-screen bg-white">
-      {/* Hero Section with Split Design */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl" />
-        </div>
+    <div className="p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white text-sm mb-6"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Unlock the full power of MemoMeet</span>
+        </motion.div>
         
-        <div className="relative max-w-7xl mx-auto px-6 py-20">
-          <div className="text-center mb-12">
-            <div className="bg-white/20 text-white border-white/30 mb-6">
-              <Lock className="w-3 h-3 mr-2" />
-              Secure Payment • 30-Day Money Back Guarantee
-            </div>
-            <h1 className="text-white mb-6">
-              Choose Your Perfect Plan
-            </h1>
-            <p className="text-white/90 max-w-3xl mx-auto mb-10">
-              Flexible pricing designed to grow with your team. All plans include our core AI features,
-              secure payment processing, and the ability to cancel anytime.
-            </p>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-4xl text-gray-900 dark:text-white mb-4"
+        >
+          Choose Your Plan
+        </motion.h1>
+        
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-lg text-gray-600 dark:text-gray-400 mb-8"
+        >
+          Select the perfect plan for your needs. Upgrade or downgrade at any time.
+        </motion.p>
 
-            {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-full p-1.5 border border-white/20">
-              <button
-                onClick={() => setBillingCycle("monthly")}
-                className={`px-6 py-2 rounded-full transition-all ${
-                  billingCycle === "monthly"
-                    ? "bg-white text-purple-600 shadow-lg"
-                    : "text-white hover:text-white/80"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle("annual")}
-                className={`px-6 py-2 rounded-full transition-all ${
-                  billingCycle === "annual"
-                    ? "bg-white text-purple-600 shadow-lg"
-                    : "text-white hover:text-white/80"
-                }`}
-              >
-                Annual
-                <span className="ml-2 text-green-400">
-                  Save {getSavingsPercent()}%
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+        {/* Billing Toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="inline-flex items-center space-x-3 p-1 bg-gray-100 dark:bg-gray-900 rounded-full"
+        >
+          <button
+            onClick={() => setBillingPeriod('monthly')}
+            className={cn(
+              "px-6 py-2 rounded-full text-sm transition-all duration-300",
+              billingPeriod === 'monthly'
+                ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-lg"
+                : "text-gray-600 dark:text-gray-400"
+            )}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBillingPeriod('yearly')}
+            className={cn(
+              "px-6 py-2 rounded-full text-sm transition-all duration-300 flex items-center space-x-2",
+              billingPeriod === 'yearly'
+                ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-lg"
+                : "text-gray-600 dark:text-gray-400"
+            )}
+          >
+            <span>Yearly</span>
+            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-950/20 text-green-600 dark:text-green-400 rounded-full text-xs">
+              Save 20%
+            </span>
+          </button>
+        </motion.div>
+      </div>
 
-      {/* Pricing Cards - Unique Layout */}
-      <section className="relative -mt-16 pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-6">
-            {Object.entries(pricingData).map(([key, plan]) => {
-              const Icon = plan.icon;
-              const price = getPrice(key);
-              
-              return (
-                <div
-                  key={key}
-                  className={`relative bg-white rounded-3xl p-8 transition-all duration-300 ${
-                    plan.popular
-                      ? "border-2 border-purple-500 shadow-2xl scale-105 lg:scale-110 z-10"
-                      : "border border-gray-200 shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-1.5 border-0 shadow-lg">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3 mb-6">
-                    <div
-                      className={`p-3 rounded-xl ${
-                        plan.popular
-                          ? "bg-gradient-to-br from-blue-600 to-purple-600"
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      <Icon
-                        className={`w-6 h-6 ${
-                          plan.popular ? "text-white" : "text-gray-700"
-                        }`}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-gray-900">{plan.name}</h3>
-                      <p className="text-gray-600">{plan.tagline}</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-6">
-                    {typeof price === "number" ? (
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-gray-900">${price}</span>
-                        <span className="text-gray-600">
-                          / {billingCycle === "monthly" ? "month" : "year"}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-gray-900">{price}</span>
-                    )}
-                    <p className="text-gray-600 mt-2">{plan.description}</p>
-                  </div>
-
-                  <Button
-                    className={`w-full mb-8 ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                        : "bg-gray-900 hover:bg-gray-800 text-white"
-                    }`}
-                  >
-                    {plan.cta}
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-
-                  <div className="space-y-3">
-                    {plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{feature}</span>
-                      </div>
-                    ))}
+      {/* Pricing Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        {plans.map((plan, index) => {
+          const Icon = plan.icon;
+          
+          return (
+            <motion.div
+              key={plan.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={cn(
+                "relative bg-white dark:bg-gray-900 rounded-3xl p-8 border shadow-lg hover:shadow-2xl transition-all duration-300",
+                plan.popular 
+                  ? "border-blue-500 dark:border-blue-500 scale-105" 
+                  : "border-gray-200 dark:border-gray-800"
+              )}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div className="px-4 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm shadow-lg">
+                    Most Popular
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              )}
 
-          {/* Trust Badge */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-4">Secure payments powered by</p>
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              {paymentMethods.map((method, idx) => (
-                <span key={idx} className="text-gray-400">
-                  {method}
-                </span>
-              ))}
-            </div>
-          </div>
+              <div className={cn(
+                "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-6 shadow-lg",
+                plan.color
+              )}>
+                <Icon className="w-7 h-7 text-white" />
+              </div>
+
+              <h3 className="text-2xl text-gray-900 dark:text-white mb-2">{plan.name}</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">{plan.description}</p>
+
+              <div className="mb-6">
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-5xl text-gray-900 dark:text-white">{plan.price}</span>
+                  {plan.price !== '$0' && (
+                    <span className="text-gray-500 dark:text-gray-400">/{billingPeriod === 'monthly' ? 'mo' : 'yr'}</span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{plan.period}</p>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  "w-full py-4 rounded-xl text-sm transition-all duration-300 mb-8 flex items-center justify-center space-x-2",
+                  plan.popular
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl"
+                    : "border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                )}
+              >
+                <span>{plan.cta}</span>
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+
+              <div className="space-y-3">
+                {plan.features.map((feature, i) => (
+                  <div key={i} className="flex items-start space-x-3">
+                    <div className={cn(
+                      "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
+                      feature.included
+                        ? "bg-green-100 dark:bg-green-950/20"
+                        : "bg-gray-100 dark:bg-gray-800"
+                    )}>
+                      <Check className={cn(
+                        "w-3 h-3",
+                        feature.included
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-gray-400"
+                      )} />
+                    </div>
+                    <span className={cn(
+                      "text-sm",
+                      feature.included
+                        ? "text-gray-700 dark:text-gray-300"
+                        : "text-gray-400 dark:text-gray-600"
+                    )}>
+                      {feature.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Additional Features */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-3xl p-8 border border-blue-100 dark:border-blue-900/30"
+      >
+        <h2 className="text-2xl text-gray-900 dark:text-white mb-8 text-center">Everything You Need to Succeed</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {additionalFeatures.map((section, index) => (
+            <motion.div
+              key={section.category}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + index * 0.1 }}
+            >
+              <h3 className="text-lg text-gray-900 dark:text-white mb-4">{section.category}</h3>
+              <ul className="space-y-2">
+                {section.items.map((item, i) => (
+                  <li key={i} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
         </div>
-      </section>
+      </motion.div>
 
-      {/* Feature Comparison */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-gray-900 mb-4">Compare All Features</h2>
-            <p className="text-gray-600">
-              Everything you get with each plan
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gradient-to-r from-blue-50 to-purple-50">
-                    <th className="px-6 py-5 text-left text-gray-900">Feature</th>
-                    <th className="px-6 py-5 text-center text-gray-900">Starter</th>
-                    <th className="px-6 py-5 text-center text-gray-900">Pro</th>
-                    <th className="px-6 py-5 text-center text-gray-900">Enterprise</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisonFeatures.map((feature, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 text-gray-700">{feature.name}</td>
-                      <td className="px-6 py-4 text-center">
-                        {feature.starter ? (
-                          <div className="flex justify-center">
-                            <Check className="w-5 h-5 text-green-500" />
-                          </div>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        {feature.pro ? (
-                          <div className="flex justify-center">
-                            <Check className="w-5 h-5 text-green-500" />
-                          </div>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        {feature.enterprise ? (
-                          <div className="flex justify-center">
-                            <Check className="w-5 h-5 text-green-500" />
-                          </div>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-    
+      {/* FAQ or CTA Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mt-12 text-center"
+      >
+        <h3 className="text-xl text-gray-900 dark:text-white mb-3">Need a custom solution?</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Contact our sales team for enterprise pricing and custom features
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="px-8 py-4 bg-white dark:bg-gray-900 border-2 border-blue-600 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all duration-300"
+        >
+          Contact Sales
+        </motion.button>
+      </motion.div>
     </div>
-    </div>
-   
   );
 }

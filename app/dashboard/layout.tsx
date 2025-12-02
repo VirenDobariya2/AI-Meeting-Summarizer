@@ -17,9 +17,12 @@ const navMap: Record<string, string> = {
   actionItems: "/dashboard/actionItems",
   settings: "/dashboard/settings",
   uploads: "/dashboard/upload",
- meetingStatus: "/dashboard/meetingStatus",
+  meetingStatus: "/dashboard/meetingStatus",
   emailAgent: "/dashboard/emailAgent",
-  "ai-workspace": "/dashboard/ai-workspace",
+  aiWorkspace: "/dashboard/aiWorkspace",
+  integration: "/dashboard/integration",
+  analytics: "/dashboard/analytics",
+  team: "/dashboard/team",
   upgrade: "/dashboard/upgrade",
 };
 

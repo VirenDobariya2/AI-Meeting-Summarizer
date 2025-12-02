@@ -1,9 +1,12 @@
+"use client"
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Zap, Brain } from 'lucide-react';
-import { Card } from '../../ui/card';
+import { Card } from '@/components/ui/card';
+ 
 
-export function AIWorkspace() {
+export default function AIWorkspace() {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">

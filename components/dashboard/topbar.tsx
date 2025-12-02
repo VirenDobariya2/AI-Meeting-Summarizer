@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, Bell, Sun, Moon, Monitor, User, ChevronDown, Command } from 'lucide-react';
-import { useTheme } from 'next-themes';
+
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -9,12 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { useTheme } from '../theme-provider';
 
 interface TopBarProps {
   onOpenCommandPalette: () => void;
+  pageTitle?: string;
 }
 
-export default function TopBar({ onOpenCommandPalette }: TopBarProps) {
+export default function TopBar({ onOpenCommandPalette, pageTitle = 'Overview' }: TopBarProps) {
   const { theme, setTheme } = useTheme();
 
   const getThemeIcon = () => {
@@ -30,31 +32,27 @@ export default function TopBar({ onOpenCommandPalette }: TopBarProps) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Search Bar - Command Palette Trigger */}
-      <div className="flex-1 max-w-xl">
-        <button
-          onClick={onOpenCommandPalette}
-          className="w-full h-10 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:border-blue-400 dark:hover:border-blue-600 transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-gray-400">
-              <Search className="w-4 h-4" />
-              <span>Search or jump to...</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <kbd className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded border border-gray-200 dark:border-gray-600 font-mono">
-                ⌘
-              </kbd>
-              <kbd className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded border border-gray-200 dark:border-gray-600 font-mono">
-                K
-              </kbd>
-            </div>
-          </div>
-        </button>
+      {/* Left side - Page Title */}
+      <div className="flex items-center space-x-6">
+        <h2 className="text-xl text-gray-900 dark:text-white">{pageTitle}</h2>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center space-x-3 ml-4">
+      <div className="flex items-center space-x-3">
+        {/* Command Palette Button */}
+        <button
+          onClick={onOpenCommandPalette}
+          className="flex items-center space-x-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:border-blue-400 dark:hover:border-blue-600 transition-all"
+        >
+          <Search className="w-4 h-4 text-gray-400" />
+          <span className="text-gray-600 dark:text-gray-400 hidden md:inline">Search</span>
+          <div className="flex items-center space-x-1">
+            <kbd className="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded border border-gray-200 dark:border-gray-600 font-mono">
+              ⌘K
+            </kbd>
+          </div>
+        </button>
+
         {/* Notifications */}
         <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
