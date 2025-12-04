@@ -10,7 +10,7 @@ interface TopBarProps {
   onOpenCommandPalette?: () => void;
 }
 
-export default function TopBar({ pageTitle = "Overview", onOpenCommandPalette }: TopBarProps) {
+export default function TopBar({ pageTitle = "ADMIN", onOpenCommandPalette }: TopBarProps) {
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [search, setSearch] = useState("");

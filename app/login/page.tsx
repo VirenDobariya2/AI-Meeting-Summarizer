@@ -2,66 +2,78 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { Mail, Lock, Chrome, Github, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { AnimatedOrb } from "@/components/AnimatedOrb";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AnimatedOrb } from "@/components/AnimatedOrb";
 import OTPModal from "@/components/OTPModal";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+ const [isLoading, setIsLoading] = useState(false)
   const [otpOpen, setOtpOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+  // Handles login submission
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      // Sign in with NextAuth credentials
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      // ADMIN → no OTP
-      if (data.role === "admin") {
-        router.push("/dashboard-admin");
+      if (res?.error) {
+        alert(res.error);
         return;
       }
 
-      // USER → send OTP + open modal
-      await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      // Fetch session to get user role
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
 
-      setOtpOpen(true);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Login failed";
-      alert(message);
+      if (!sessionData?.user) throw new Error("No session found");
+
+      if (sessionData.user.role === "admin") {
+        // Admin logs in directly
+        router.push("/admin");
+      } else {
+        // Normal user → send OTP
+        await fetch("/api/auth/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        setOtpOpen(true);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Login failed");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }
+  };
 
-  function handleVerified() {
-    router.push("/dashboard"); 
-  }
+  // When OTP is verified
+  const handleVerified = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 md:p-8 bg-[#05010f] relative overflow-hidden">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-        {/* LEFT SECTION */}
+        {/* Left Section */}
         <motion.div
           className="hidden lg:flex flex-col items-center justify-center space-y-8"
           initial={{ opacity: 0, x: -40 }}
@@ -79,7 +91,7 @@ export default function LoginPage() {
           </div>
         </motion.div>
 
-        {/* RIGHT SECTION */}
+        {/* Right Section - Login Form */}
         <motion.div
           className="w-full max-w-md mx-auto"
           initial={{ opacity: 0, x: 40 }}
@@ -98,9 +110,11 @@ export default function LoginPage() {
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     type="email"
-                    className="pl-12 bg-white/5 border-white/10 text-white h-12"
-                    placeholder="you@example.com"
-                    onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 rounded-xl focus:border-purple-400 focus:ring-purple-400/20"
+                      required
                   />
                 </div>
               </div>
@@ -112,33 +126,47 @@ export default function LoginPage() {
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     type="password"
-                    className="pl-12 bg-white/5 border-white/10 text-white h-12"
-                    placeholder="••••••••"
-                    onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 rounded-xl focus:border-purple-400 focus:ring-purple-400/20"
+                      required
                   />
                 </div>
               </div>
 
-              {/* Forgot password */}
-              <div className="flex justify-end">
-                <Link
-                  href="/forgot-password"
-                  className="text-purple-400 text-sm"
-                >
-                  Forgot Password?
-                </Link>
+              {/* Remember me */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) =>
+                      setRememberMe(checked as boolean)
+                    }
+                    className="border-white/20 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm text-gray-300 cursor-pointer"
+                  >
+                    Remember me
+                  </label>
+                </div>
+                <button className="text-purple-400 text-sm">Forgot Password?</button>
               </div>
 
-              {/* SINGLE SUBMIT BUTTON */}
+              {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 h-12"
-                disabled={loading}
+                disabled={isLoading}
               >
-                {loading ? <Loader2 className="animate-spin" /> : "Submit"}
+                {isLoading ? <Loader2 className="animate-spin" /> : "Submit"}
               </Button>
             </form>
-            {/* OTP MODAL */}
+
+            {/* OTP Modal */}
             {otpOpen && (
               <OTPModal
                 email={email}
@@ -147,7 +175,7 @@ export default function LoginPage() {
               />
             )}
 
-            {/* SOCIAL LOGIN */}
+            {/* Social Login */}
             <div className="grid grid-cols-2 gap-4 mt-6">
               <Button
                 onClick={() => (window.location.href = "/api/auth/google")}
